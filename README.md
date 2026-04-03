@@ -196,6 +196,82 @@ Open a shell in the app container:
 docker compose exec app sh
 ```
 
+## Category API Test
+
+Use Postman with this base URL:
+
+```bash
+http://localhost:8080/api/v1/categories
+```
+
+### 1. Get Category List
+
+- Method: `GET`
+- URL: `http://localhost:8080/api/v1/categories`
+- Body: none
+
+Example response:
+
+```json
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Electronics",
+      "slug": "electronics"
+    }
+  ]
+}
+```
+
+### 2. Get Category Detail
+
+- Method: `GET`
+- URL: `http://localhost:8080/api/v1/categories/1`
+- Body: none
+
+### 3. Create Category
+
+- Method: `POST`
+- URL: `http://localhost:8080/api/v1/categories`
+- Headers:
+  - `Content-Type: application/json`
+- Body:
+
+```json
+{
+  "name": "Electronics",
+  "slug": "electronics"
+}
+```
+
+### 4. Update Category
+
+- Method: `PUT`
+- URL: `http://localhost:8080/api/v1/categories/1`
+- Headers:
+  - `Content-Type: application/json`
+- Body:
+
+```json
+{
+  "name": "Updated Electronics",
+  "slug": "updated-electronics"
+}
+```
+
+### 5. Delete Category
+
+- Method: `DELETE`
+- URL: `http://localhost:8080/api/v1/categories/1`
+- Body: none
+
+### Postman Notes
+
+- Select `Body` -> `raw` -> `JSON` for `POST` and `PUT`
+- Current API is available without authentication
+- `GET` endpoints are ready and returning JSON
+
 ## Notes
 
 - `docker-compose.yml` expects `docker/nginx/default.conf` to exist.
