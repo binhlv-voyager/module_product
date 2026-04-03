@@ -13,6 +13,12 @@
         "mongodb/laravel-mongodb": "^5.7",
         "nwidart/laravel-modules": "*"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "git@github.com:Voyager-hcm/dev-tools.git"
+        }
+    ],
     "require-dev": {
         "fakerphp/faker": "^1.23",
         "laravel/pail": "^1.2.2",
@@ -20,7 +26,8 @@
         "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
-        "phpunit/phpunit": "^11.5.3"
+        "phpunit/phpunit": "^11.5.3",
+        "voyager/dev-tools": "^1.2"
     },
     "autoload": {
         "psr-4": {
@@ -75,6 +82,7 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true,
+            "voyager/dev-tools": true,
             "wikimedia/composer-merge-plugin": true
         }
     },
