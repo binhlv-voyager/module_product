@@ -14,6 +14,8 @@ interface ProductRepositoryInterface
 
     public function findOrFail(int $id): Product;
 
+    public function existsByCategoryId(int $categoryId): bool;
+
     public function create(array $attributes): Product;
 
     public function update(Product $product, array $attributes): bool;

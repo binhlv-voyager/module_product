@@ -31,6 +31,13 @@ class ProductRepository implements ProductRepositoryInterface
             ->findOrFail($id);
     }
 
+    public function existsByCategoryId(int $categoryId): bool
+    {
+        return Product::query()
+            ->where('category_id', $categoryId)
+            ->exists();
+    }
+
     public function create(array $attributes): Product
     {
         return Product::query()->create($attributes);

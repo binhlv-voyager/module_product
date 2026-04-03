@@ -4,6 +4,7 @@ namespace Modules\Category\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Modules\Category\Exceptions\CategoryHasProductsException;
 use Modules\Category\Http\Requests\StoreCategoryRequest;
 use Modules\Category\Http\Requests\UpdateCategoryRequest;
 use Modules\Category\Services\CategoryServiceInterface;
@@ -103,7 +104,13 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        $this->categories->deleteCategory((int) $id);
+        try {
+            $this->categories->deleteCategory((int) $id);
+        } catch (CategoryHasProductsException $exception) {
+            return redirect()
+                ->route('category.index')
+                ->withErrors(['delete' => $exception->getMessage()]);
+        }
 
         return redirect()
             ->route('category.index')
