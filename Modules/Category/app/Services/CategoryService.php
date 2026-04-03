@@ -5,13 +5,16 @@ namespace Modules\Category\Services;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Modules\Category\Exceptions\CategoryHasProductsException;
 use Modules\Category\Models\Category;
 use Modules\Category\Repositories\CategoryRepositoryInterface;
+use Modules\Product\Repositories\ProductRepositoryInterface;
 
 class CategoryService implements CategoryServiceInterface
 {
     public function __construct(
         private readonly CategoryRepositoryInterface $categories,
+        private readonly ProductRepositoryInterface $products,
     ) {}
 
     public function getAllCategories(): Collection
@@ -50,6 +53,10 @@ class CategoryService implements CategoryServiceInterface
     public function deleteCategory(int $id): ?bool
     {
         $category = $this->categories->findOrFail($id);
+
+        if ($this->products->existsByCategoryId($category->id)) {
+            throw new CategoryHasProductsException('Cannot delete category because it still has products.');
+        }
 
         return $this->categories->delete($category);
     }
