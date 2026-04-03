@@ -1,0 +1,26 @@
+repos:
+-   repo: local
+    hooks:
+    # 1. Run PHPStan inside Docker
+    -   id: phpstan
+        name: PHPStan (in Docker)
+        entry: php vendor/bin/voyager-run
+        language: system
+        types: [php]
+        args: ['phpstan']
+
+    # 2. Run PHPCS inside Docker
+    -   id: phpcs
+        name: PHP Code Sniffer (in Docker)
+        entry: php vendor/bin/voyager-run
+        language: system
+        types: [php]
+        args: ['phpcs']
+        
+    # 3. Run Detect Secrets inside Docker
+    -   id: detect-secrets
+        name: Detect Secrets (in Docker)
+        entry: php vendor/bin/voyager-run
+        language: system
+        types: [php]
+        args: ['detect-secrets-hook', '--baseline', '.secrets.baseline']

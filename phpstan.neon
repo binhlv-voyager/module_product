@@ -1,0 +1,25 @@
+# templates/phpstan.neon.dist
+
+includes:
+    # This path is relative to the Docker container's toolset. 
+    # The voyager-run script will handle the translation if running in Native mode.
+    - /tools/vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    level: 5
+    paths:
+        - app
+        - config
+        - database
+        - routes
+    
+    # Prevents PHPStan from crashing if you have ignoreErrors that don't match anything
+    reportUnmatchedIgnoredErrors: false
+
+# VOYAGER CUSTOM RULES
+services:
+    -
+        class: Voyager\DevTools\Rules\NoBadCodeInControllerRule
+        tags:
+            - phpstan.rules.rule

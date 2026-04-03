@@ -1,0 +1,166 @@
+# VOYAGER Code Quality Check Workflow
+# This workflow provides comprehensive code quality checks including linting,
+# static analysis, security scanning, and formatting validation
+name: VOYAGER Code Quality Check
+
+# Workflow Triggers:
+# This workflow runs on:
+# 1. 'push' events to any branch
+# 2. 'pull_request' events targeting 'main' or 'master' branches
+# 3. Manual workflow dispatch for debugging
+on:
+  push:
+    branches:
+      - "**" # Run on all branches
+  pull_request:
+    branches:
+      - "main"
+      - "master"
+  workflow_dispatch: # Allow manual triggering
+
+# Global environment variables
+env:
+  PHP_VERSION: '8.2'
+  PYTHON_VERSION: '3.12'
+  COMPOSER_CACHE_DIR: ~/.cache/composer
+
+# Ensure only one workflow runs at a time per PR/branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Setup and validation job - runs first to validate environment
+  setup:
+    name: Environment Setup & Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    outputs:
+      php-version: ${{ steps.setup-info.outputs.php-version }}
+      python-version: ${{ steps.setup-info.outputs.python-version }}
+      cache-key: ${{ steps.setup-info.outputs.cache-key }}
+
+    steps:
+      # Step 1: Checkout repository code with full history for better analysis
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for better analysis
+
+      # Step 2: Output setup information for other jobs
+      - name: Setup Information
+        id: setup-info
+        run: |
+          echo "php-version=${{ env.PHP_VERSION }}" >> $GITHUB_OUTPUT
+          echo "python-version=${{ env.PYTHON_VERSION }}" >> $GITHUB_OUTPUT
+          echo "cache-key=${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}" >> $GITHUB_OUTPUT
+
+      # Step 3: Validate required files exist
+      - name: Validate Project Structure
+        run: |
+          if [ ! -f "composer.json" ]; then
+            echo "❌ composer.json not found"
+            exit 1
+          fi
+          echo "✅ Project structure validated"
+
+  # Main quality check job - depends on setup
+  quality-checks:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+    needs: setup
+    timeout-minutes: 30
+
+    steps:
+      # Step 1: Checkout repository code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Step 2: Setup Python environment for pre-commit
+      - name: Setup Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ needs.setup.outputs.python-version }}
+
+      # Step 3: Setup PHP environment for Composer and analysis tools
+      - name: Setup PHP Environment
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ needs.setup.outputs.php-version }}
+          extensions: dom, curl, libxml, mbstring, zip, intl
+          tools: composer:v2
+          coverage: none # Disable Xdebug for better performance
+
+      # Step 4: Cache Python dependencies
+      - name: Cache Python Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # Step 5: Cache Composer dependencies for faster builds
+      - name: Cache Composer Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.COMPOSER_CACHE_DIR }}
+          key: ${{ needs.setup.outputs.cache-key }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      # Step 6: Install pre-commit framework
+      - name: Install Pre-commit Framework
+        run: |
+          pip install --upgrade pip
+          pip install pre-commit
+          pre-commit --version
+
+      # Step 7: Install project dependencies and activate Voyager plugin
+      # CRITICAL STEP: This installs "voyager/dev-tools" and triggers Plugin.php
+      - name: Install Composer Dependencies & Activate Voyager Plugin
+        run: |
+          composer install --no-interaction --no-progress --optimize-autoloader
+          echo "✅ Composer dependencies installed successfully"
+        # The Voyager Plugin automatically:
+        # - Copies configuration files (.pre-commit-config.yaml, .neon, .xml, .baseline)
+        # - Builds Docker image 'voyager-linter:latest' (GitHub runners have Docker)
+        # - Runs initial 'detect-secrets scan'
+        # - Executes 'pre-commit install' (though we don't use hooks in CI)
+
+      # Step 8: Validate plugin installation
+      - name: Validate Voyager Plugin Installation
+        run: |
+          if [ ! -f ".pre-commit-config.yaml" ]; then
+            echo "❌ Pre-commit config not found - Plugin may have failed"
+            exit 1
+          fi
+          echo "✅ Voyager plugin installed successfully"
+
+      # Step 9: Run comprehensive quality checks
+      # This is the "golden command" for CI safety
+      # Reads .pre-commit-config.yaml (created by Plugin) and runs ALL hooks
+      # (phpstan, phpcs, detect-secrets) on ALL project files
+      - name: Execute Code Quality Checks
+        run: |
+          echo "🔍 Running comprehensive code quality analysis..."
+          pre-commit run --all-files --show-diff-on-failure
+          echo "✅ All quality checks passed successfully"
+
+      # Step 10: Generate quality report summary
+      - name: Generate Quality Report
+        if: always()
+        run: |
+          echo "## 📊 Code Quality Report" >> $GITHUB_STEP_SUMMARY
+          echo "- **PHP Version**: ${{ env.PHP_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Python Version**: ${{ env.PYTHON_VERSION }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflow**: ${{ github.workflow }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "- **Status**: ✅ All checks passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status**: ❌ Some checks failed" >> $GITHUB_STEP_SUMMARY
+          fi
