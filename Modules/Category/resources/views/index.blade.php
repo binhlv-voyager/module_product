@@ -41,66 +41,86 @@
             <section id="category-form" class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
                 <div class="mb-5">
                     <h2 class="text-xl font-semibold text-stone-900">
-                        {{ $mode === 'edit' ? 'Edit Category' : 'Create Category' }}
+                        {{ $mode === 'show' ? 'Category Detail' : ($mode === 'edit' ? 'Edit Category' : 'Create Category') }}
                     </h2>
                     <p class="mt-1 text-sm text-stone-500">
-                        {{ $mode === 'edit' ? 'Update the selected category.' : 'Add a new category to PostgreSQL.' }}
+                        {{ $mode === 'show' ? 'Review the selected category information.' : ($mode === 'edit' ? 'Update the selected category.' : 'Add a new category to PostgreSQL.') }}
                     </p>
                 </div>
 
-                <form
-                    method="POST"
-                    action="{{ $mode === 'edit' && $selectedCategory ? route('category.update', $selectedCategory->id) : route('category.store') }}"
-                    class="space-y-4"
-                >
-                    @csrf
-                    @if ($mode === 'edit' && $selectedCategory)
-                        @method('PUT')
-                    @endif
-
-                    <div>
-                        <label for="name" class="mb-2 block text-sm font-medium text-stone-700">Name</label>
-                        <input
-                            id="name"
-                            name="name"
-                            type="text"
-                            value="{{ old('name', $selectedCategory->name ?? '') }}"
-                            class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            placeholder="Example: Electronics"
-                            required
-                        >
+                @if ($mode === 'show' && $selectedCategory)
+                    <div class="mt-6 rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">Category Detail</p>
+                        <dl class="mt-3 space-y-3 text-sm text-stone-700">
+                            <div>
+                                <dt class="font-medium text-stone-900">ID</dt>
+                                <dd>{{ $selectedCategory->id }}</dd>
+                            </div>
+                            <div>
+                                <dt class="font-medium text-stone-900">Name</dt>
+                                <dd>{{ $selectedCategory->name }}</dd>
+                            </div>
+                            <div>
+                                <dt class="font-medium text-stone-900">Slug</dt>
+                                <dd>{{ $selectedCategory->slug }}</dd>
+                            </div>
+                        </dl>
                     </div>
-
-                    <div>
-                        <label for="slug" class="mb-2 block text-sm font-medium text-stone-700">Slug</label>
-                        <input
-                            id="slug"
-                            name="slug"
-                            type="text"
-                            value="{{ old('slug', $selectedCategory->slug ?? '') }}"
-                            class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
-                            placeholder="example: electronics"
-                        >
-                    </div>
-
-                    <div class="flex gap-3 pt-2">
-                        <button
-                            type="submit"
-                            class="inline-flex flex-1 items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-500"
-                        >
-                            {{ $mode === 'edit' ? 'Update Category' : 'Create Category' }}
-                        </button>
-
-                        @if ($mode === 'edit')
-                            <a
-                                href="{{ route('category.index') }}"
-                                class="inline-flex items-center justify-center rounded-xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
-                            >
-                                Cancel
-                            </a>
+                @else
+                    <form
+                        method="POST"
+                        action="{{ $mode === 'edit' && $selectedCategory ? route('category.update', $selectedCategory->id) : route('category.store') }}"
+                        class="space-y-4"
+                    >
+                        @csrf
+                        @if ($mode === 'edit' && $selectedCategory)
+                            @method('PUT')
                         @endif
-                    </div>
-                </form>
+
+                        <div>
+                            <label for="name" class="mb-2 block text-sm font-medium text-stone-700">Name</label>
+                            <input
+                                id="name"
+                                name="name"
+                                type="text"
+                                value="{{ old('name', $selectedCategory->name ?? '') }}"
+                                class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                                placeholder="Example: Electronics"
+                                required
+                            >
+                        </div>
+
+                        <div>
+                            <label for="slug" class="mb-2 block text-sm font-medium text-stone-700">Slug</label>
+                            <input
+                                id="slug"
+                                name="slug"
+                                type="text"
+                                value="{{ old('slug', $selectedCategory->slug ?? '') }}"
+                                class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                                placeholder="example: electronics"
+                            >
+                        </div>
+
+                        <div class="flex gap-3 pt-2">
+                            <button
+                                type="submit"
+                                class="inline-flex flex-1 items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-500"
+                            >
+                                {{ $mode === 'edit' ? 'Update Category' : 'Create Category' }}
+                            </button>
+
+                            @if ($mode === 'edit')
+                                <a
+                                    href="{{ route('category.index') }}"
+                                    class="inline-flex items-center justify-center rounded-xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
+                                >
+                                    Cancel
+                                </a>
+                            @endif
+                        </div>
+                    </form>
+                @endif
             </section>
 
             <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
@@ -118,7 +138,7 @@
                                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-stone-500">ID</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-stone-500">Name</th>
                                 <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-stone-500">Slug</th>
-                                <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-stone-500">Actions</th>
+                                <th class="whitespace-nowrap px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-stone-500">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-stone-200 bg-white">
@@ -127,8 +147,14 @@
                                     <td class="px-4 py-4 text-sm text-stone-600">{{ $category->id }}</td>
                                     <td class="px-4 py-4 text-sm font-medium text-stone-900">{{ $category->name }}</td>
                                     <td class="px-4 py-4 text-sm text-stone-600">{{ $category->slug }}</td>
-                                    <td class="px-4 py-4">
-                                        <div class="flex flex-wrap justify-end gap-2">
+                                    <td class="whitespace-nowrap px-4 py-4">
+                                        <div class="flex flex-nowrap justify-end gap-2">
+                                            <a
+                                                href="{{ route('category.show', $category->id) }}"
+                                                class="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-medium text-sky-700 transition hover:bg-sky-100"
+                                            >
+                                                Detail
+                                            </a>
                                             <a
                                                 href="{{ route('category.edit', $category->id) }}#category-form"
                                                 class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700 transition hover:bg-amber-100"

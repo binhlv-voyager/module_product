@@ -99,8 +99,8 @@ Use the following values when creating connections in Navicat.
 - Connection type: `MongoDB`
 - Host: `127.0.0.1`
 - Port: `27018`
-- Username: leave empty
-- Password: leave empty
+- Username: 
+- Password: 
 - Database: `module_review`
 
 ### MySQL
