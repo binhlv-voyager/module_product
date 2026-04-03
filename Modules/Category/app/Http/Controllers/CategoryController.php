@@ -29,7 +29,10 @@ class CategoryController extends Controller
         $selectedCategory = null;
         $mode = null;
 
-        if ($request->filled('edit')) {
+        if ($request->filled('show')) {
+            $selectedCategory = $this->categories->getCategoryById($request->integer('show'));
+            $mode = 'show';
+        } elseif ($request->filled('edit')) {
             $selectedCategory = $this->categories->getCategoryById($request->integer('edit'));
             $mode = 'edit';
         }
@@ -67,7 +70,7 @@ class CategoryController extends Controller
     public function show(Request $request, $id)
     {
         if (! ($request->expectsJson() || $request->is('api/*'))) {
-            return redirect()->route('category.index');
+            return redirect()->route('category.index', ['show' => $id]);
         }
 
         return response()->json([

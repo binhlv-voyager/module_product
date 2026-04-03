@@ -16,4 +16,8 @@ class Product extends Model
         'price',
         'category_id',
     ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+    ];
 }

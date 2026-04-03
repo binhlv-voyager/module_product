@@ -4,8 +4,10 @@ namespace Modules\Product\Providers;
 
 use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
-use Modules\Product\Repositories\EloquentProductRepository;
 use Modules\Product\Repositories\ProductRepository;
+use Modules\Product\Repositories\ProductRepositoryInterface;
+use Modules\Product\Services\ProductService;
+use Modules\Product\Services\ProductServiceInterface;
 
 class ProductServiceProvider extends ModuleServiceProvider
 {
@@ -40,7 +42,8 @@ class ProductServiceProvider extends ModuleServiceProvider
     {
         parent::register();
 
-        $this->app->bind(ProductRepository::class, EloquentProductRepository::class);
+        $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
+        $this->app->bind(ProductServiceInterface::class, ProductService::class);
     }
 
     /**
