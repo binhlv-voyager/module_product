@@ -13,7 +13,7 @@ Laravel 12 service running with three database connections:
 
 ## Environment
 
-The project reads database configuration from [`.env`](D:\Module-Product\.env).
+The project reads database configuration from [`.env`](.env).
 
 Main variables:
 
@@ -26,11 +26,50 @@ If `.env` does not exist, create it from `.env.example` before starting the stac
 
 ## Run With Docker
 
-Build and start all services:
+### Step-by-step (first run)
+
+Step 1: Build and start all services:
 
 ```bash
 docker compose up -d --build
 ```
+
+Step 2: Install PHP dependencies (this creates `vendor/` so Laravel can boot):
+
+```bash
+docker compose exec app composer install
+```
+
+Step 3: Generate the application key (required by Laravel):
+
+```bash
+docker compose exec app php artisan key:generate
+```
+
+Step 4: Run migrations (core + all modules):
+
+```bash
+docker compose exec app php artisan migrate
+docker compose exec app php artisan module:migrate -a
+```
+
+Step 5: Run seeders (optional, for sample data):
+
+```bash
+docker compose exec app php artisan db:seed
+```
+
+Step 6: Clear caches (recommended after changing env/deps):
+
+```bash
+docker compose exec app php artisan optimize:clear
+```
+
+Step 7: Open the app:
+
+- App: `http://localhost:8080`
+
+### Useful Docker commands
 
 Check running containers:
 
@@ -65,10 +104,6 @@ Stop all services and remove volumes:
 ```bash
 docker compose down -v
 ```
-
-## Application URL
-
-- App: `http://localhost:8080`
 
 ## Database Services
 
@@ -182,6 +217,24 @@ Run migrations:
 
 ```bash
 docker compose exec app php artisan migrate
+```
+
+Run migrations for all modules:
+
+```bash
+docker compose exec app php artisan module:migrate -a
+```
+
+Run seeders:
+
+```bash
+docker compose exec app php artisan db:seed
+```
+
+Run seeders for all modules:
+
+```bash
+docker compose exec app php artisan module:seed -a
 ```
 
 Open Laravel Tinker:
