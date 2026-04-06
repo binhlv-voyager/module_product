@@ -16,4 +16,11 @@ class Review extends Model
         'rating',
         'comment',
     ];
+
+    protected $casts = [
+        'product_id' => 'integer',
+        'rating' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 }

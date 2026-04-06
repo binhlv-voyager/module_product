@@ -4,8 +4,10 @@ namespace Modules\Review\Providers;
 
 use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
-use Modules\Review\Repositories\EloquentReviewRepository;
 use Modules\Review\Repositories\ReviewRepository;
+use Modules\Review\Repositories\ReviewRepositoryInterface;
+use Modules\Review\Services\ReviewService;
+use Modules\Review\Services\ReviewServiceInterface;
 
 class ReviewServiceProvider extends ModuleServiceProvider
 {
@@ -40,12 +42,13 @@ class ReviewServiceProvider extends ModuleServiceProvider
     {
         parent::register();
 
-        $this->app->bind(ReviewRepository::class, EloquentReviewRepository::class);
+        $this->app->bind(ReviewRepositoryInterface::class, ReviewRepository::class);
+        $this->app->bind(ReviewServiceInterface::class, ReviewService::class);
     }
 
     /**
      * Define module schedules.
-     * 
+     *
      * @param $schedule
      */
     // protected function configureSchedules(Schedule $schedule): void
