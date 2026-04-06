@@ -74,6 +74,141 @@
                             </div>
                         </dl>
                     </div>
+
+                    <div class="mt-6 rounded-2xl border border-stone-200 bg-stone-50 p-4">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Reviews</p>
+                                <h3 class="mt-1 text-base font-semibold text-stone-900">
+                                    {{ $reviews->count() }} review{{ $reviews->count() === 1 ? '' : 's' }}
+                                </h3>
+                            </div>
+                        </div>
+
+                        <div id="reviews" class="mt-4 space-y-3">
+                            @forelse ($reviews as $review)
+                                <article class="rounded-2xl border border-stone-200 bg-white p-4">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p class="text-sm font-semibold text-stone-900">{{ $review->author_name }}</p>
+                                            <p class="mt-1 text-xs text-stone-500">
+                                                {{ $review->created_at ? $review->created_at->format('d/m/Y H:i') : 'No timestamp' }}
+                                            </p>
+                                        </div>
+                                        <span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                                            {{ $review->rating }}/5
+                                        </span>
+                                    </div>
+                                    <p class="mt-3 text-sm leading-6 text-stone-700">{{ $review->comment }}</p>
+                                </article>
+                            @empty
+                                <div class="rounded-2xl border border-dashed border-stone-300 bg-white px-4 py-6 text-sm text-stone-500">
+                                    {{ __('No reviews for this product yet.') }}
+                                </div>
+                            @endforelse
+                        </div>
+
+                        <div class="mt-4">
+                            <a
+                                href="{{ route('product.index', ['show' => $selectedProduct->id, 'review' => 'create']) }}#review-form"
+                                class="inline-flex items-center justify-center rounded-xl bg-amber-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-amber-500"
+                            >
+                                Create Review
+                            </a>
+                        </div>
+
+                        @if (($reviewMode ?? null) === 'create')
+                            @php
+                                $reviewErrors = $errors->getBag('review');
+                            @endphp
+
+                            <div id="review-form" class="mt-6 rounded-2xl border border-amber-200 bg-white p-4">
+                                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                    <div>
+                                        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">Add Review</p>
+                                        <h4 class="mt-1 text-base font-semibold text-stone-900">New review for this product</h4>
+                                    </div>
+                                    <a
+                                        href="{{ route('product.index', ['show' => $selectedProduct->id]) }}#reviews"
+                                        class="inline-flex items-center justify-center rounded-xl bg-stone-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-stone-700"
+                                    >
+                                        Close
+                                    </a>
+                                </div>
+
+                                @if ($reviewErrors->any())
+                                    <div class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+                                        <ul class="space-y-1">
+                                            @foreach ($reviewErrors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
+
+                                <form method="POST" action="{{ route('review.store', ['product' => $selectedProduct->id]) }}" class="mt-4 space-y-4">
+                                    @csrf
+
+                                    <div>
+                                        <label for="author_name" class="mb-2 block text-sm font-medium text-stone-700">Author Name</label>
+                                        <input
+                                            id="author_name"
+                                            name="author_name"
+                                            type="text"
+                                            value="{{ old('author_name') }}"
+                                            class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                                            placeholder="Example: Nguyen Van A"
+                                            required
+                                        >
+                                    </div>
+
+                                    <div>
+                                        <label for="rating" class="mb-2 block text-sm font-medium text-stone-700">Rating</label>
+                                        <select
+                                            id="rating"
+                                            name="rating"
+                                            class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                                            required
+                                        >
+                                            <option value="">Select rating</option>
+                                            @for ($rating = 5; $rating >= 1; $rating--)
+                                                <option value="{{ $rating }}" @selected((string) old('rating') === (string) $rating)>
+                                                    {{ $rating }}/5
+                                                </option>
+                                            @endfor
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label for="comment" class="mb-2 block text-sm font-medium text-stone-700">Comment</label>
+                                        <textarea
+                                            id="comment"
+                                            name="comment"
+                                            rows="6"
+                                            class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-100"
+                                            placeholder="Write your review"
+                                            required
+                                        >{{ old('comment') }}</textarea>
+                                    </div>
+
+                                    <div class="flex flex-wrap gap-3 pt-2">
+                                        <button
+                                            type="submit"
+                                            class="inline-flex items-center justify-center rounded-xl bg-amber-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-amber-500"
+                                        >
+                                            Save Review
+                                        </button>
+                                        <a
+                                            href="{{ route('product.index', ['show' => $selectedProduct->id]) }}#reviews"
+                                            class="inline-flex items-center justify-center rounded-xl border border-stone-300 px-4 py-3 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
+                                        >
+                                            Cancel
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        @endif
+                    </div>
                 @else
                     <form
                         method="POST"
