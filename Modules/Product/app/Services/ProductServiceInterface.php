@@ -14,6 +14,8 @@ interface ProductServiceInterface
 
     public function getProductById(int $id): Product;
 
+    public function getReviewsByProductId(int $productId): Collection;
+
     public function getCategoryOptions(): Collection;
 
     public function createProduct(array $attributes): Product;

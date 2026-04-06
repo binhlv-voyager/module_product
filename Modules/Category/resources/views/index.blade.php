@@ -7,7 +7,7 @@
             </div>
             <div class="flex flex-wrap gap-3">
                 <a
-                    href="{{ route('category.index') }}#category-form"
+                    href="{{ route('category.index', ['create' => 1]) }}#category-form"
                     class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-emerald-500"
                 >
                     Create
@@ -37,8 +37,9 @@
             </div>
         @endif
 
-        <div class="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)]">
-            <section id="category-form" class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
+        <div class="grid gap-6 {{ $mode ? 'lg:grid-cols-[380px_minmax(0,1fr)]' : 'lg:grid-cols-1' }}">
+            @if ($mode)
+                <section id="category-form" class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
                 <div class="mb-5">
                     <h2 class="text-xl font-semibold text-stone-900">
                         {{ $mode === 'show' ? 'Category Detail' : ($mode === 'edit' ? 'Edit Category' : 'Create Category') }}
@@ -121,7 +122,8 @@
                         </div>
                     </form>
                 @endif
-            </section>
+                </section>
+            @endif
 
             <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
                 <div class="mb-5 flex items-center justify-between">
@@ -151,7 +153,7 @@
                                         <div class="flex flex-nowrap justify-end gap-2">
                                             <a
                                                 href="{{ route('category.show', $category->id) }}"
-                                                class="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-medium text-sky-700 transition hover:bg-sky-100"
+                                                class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-medium text-blue-700 transition hover:bg-blue-100"
                                             >
                                                 Detail
                                             </a>

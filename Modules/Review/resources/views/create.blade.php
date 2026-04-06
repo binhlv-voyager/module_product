@@ -44,7 +44,7 @@
             </section>
 
             <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
-                <form method="POST" action="{{ route('review.store', $product->id) }}" class="space-y-4">
+                <form method="POST" action="{{ route('review.create', $product->id) }}" class="space-y-4">
                     @csrf
 
                     <div>

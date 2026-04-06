@@ -33,6 +33,8 @@ class CategoryController extends Controller
         if ($request->filled('show')) {
             $selectedCategory = $this->categories->getCategoryById($request->integer('show'));
             $mode = 'show';
+        } elseif ($request->filled('create')) {
+            $mode = 'create';
         } elseif ($request->filled('edit')) {
             $selectedCategory = $this->categories->getCategoryById($request->integer('edit'));
             $mode = 'edit';

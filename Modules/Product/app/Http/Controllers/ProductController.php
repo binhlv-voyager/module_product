@@ -4,16 +4,15 @@ namespace Modules\Product\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Modules\Product\Exceptions\ProductHasReviewsException;
 use Modules\Product\Http\Requests\StoreProductRequest;
 use Modules\Product\Http\Requests\UpdateProductRequest;
 use Modules\Product\Services\ProductServiceInterface;
-use Modules\Review\Services\ReviewServiceInterface;
 
 class ProductController extends Controller
 {
     public function __construct(
         private readonly ProductServiceInterface $products,
-        private readonly ReviewServiceInterface $reviews,
     ) {}
 
     /**
@@ -36,18 +35,13 @@ class ProductController extends Controller
 
         if ($request->filled('show')) {
             $selectedProduct = $this->products->getProductById($request->integer('show'));
-            if (! $selectedProduct) {
-                abort(404);
-            }
-
-            $reviews = $this->reviews->getReviewsByProductId((int) $selectedProduct->id);
+            $reviews = $this->products->getReviewsByProductId((int) $selectedProduct->id);
             $mode = 'show';
             $reviewMode = $request->input('review');
+        } elseif ($request->filled('create')) {
+            $mode = 'create';
         } elseif ($request->filled('edit')) {
             $selectedProduct = $this->products->getProductById($request->integer('edit'));
-            if (! $selectedProduct) {
-                abort(404);
-            }
             $mode = 'edit';
         }
 
@@ -101,7 +95,7 @@ class ProductController extends Controller
 
         return response()->json([
             'data' => $product,
-            'reviews' => $this->reviews->getReviewsByProductId((int) $product->id),
+            'reviews' => $this->products->getReviewsByProductId((int) $product->id),
         ]);
     }
 
@@ -137,10 +131,12 @@ class ProductController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        if ($this->reviews->hasReviewsForProductId((int) $id)) {
+        try {
+            $this->products->deleteProduct((int) $id);
+        } catch (ProductHasReviewsException $exception) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return response()->json([
-                    'message' => 'Cannot delete product because it has reviews.',
+                    'message' => $exception->getMessage(),
                 ], 409);
             }
 
@@ -148,8 +144,6 @@ class ProductController extends Controller
                 ->route('product.index', ['show' => (int) $id])
                 ->withErrors(['product' => __('Cannot delete product because it has reviews. Please delete its reviews first.')]);
         }
-
-        $this->products->deleteProduct((int) $id);
 
         if ($request->expectsJson() || $request->is('api/*')) {
             return response()->json([

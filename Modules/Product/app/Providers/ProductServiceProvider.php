@@ -4,6 +4,8 @@ namespace Modules\Product\Providers;
 
 use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Category\Contracts\Product\ContractsProduct;
+use Modules\Product\Adapters\Category\CategoryProductAdapter;
 use Modules\Product\Repositories\ProductRepository;
 use Modules\Product\Repositories\ProductRepositoryInterface;
 use Modules\Product\Services\ProductService;
@@ -44,11 +46,12 @@ class ProductServiceProvider extends ModuleServiceProvider
 
         $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
         $this->app->bind(ProductServiceInterface::class, ProductService::class);
+        $this->app->bind(ContractsProduct::class, CategoryProductAdapter::class);
     }
 
     /**
      * Define module schedules.
-     * 
+     *
      * @param $schedule
      */
     // protected function configureSchedules(Schedule $schedule): void

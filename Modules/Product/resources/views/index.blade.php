@@ -11,7 +11,7 @@
             </div>
             <div class="flex flex-wrap gap-3">
                 <a
-                    href="{{ route('product.index') }}#product-form"
+                    href="{{ route('product.index', ['create' => 1]) }}#product-form"
                     class="inline-flex items-center justify-center rounded-xl bg-amber-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-amber-500"
                 >
                     Create
@@ -41,8 +41,9 @@
             </div>
         @endif
 
-        <div class="grid gap-6 lg:grid-cols-[420px_minmax(0,1fr)]">
-            <section id="product-form" class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
+        <div class="grid gap-6 {{ $mode ? 'lg:grid-cols-[420px_minmax(0,1fr)]' : 'lg:grid-cols-1' }}">
+            @if ($mode)
+                <section id="product-form" class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
                 <div class="mb-5">
                     <h2 class="text-xl font-semibold text-stone-900">
                         {{ $mode === 'show' ? 'Product Detail' : ($mode === 'edit' ? 'Edit Product' : 'Create Product') }}
@@ -76,46 +77,47 @@
                     </div>
 
                     <div class="mt-6 rounded-2xl border border-stone-200 bg-stone-50 p-4">
-                        <div class="flex items-center justify-between gap-3">
-                            <div>
-                                <p class="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Reviews</p>
-                                <h3 class="mt-1 text-base font-semibold text-stone-900">
-                                    {{ $reviews->count() }} review{{ $reviews->count() === 1 ? '' : 's' }}
-                                </h3>
-                            </div>
-                        </div>
-
-                        <div id="reviews" class="mt-4 space-y-3">
-                            @forelse ($reviews as $review)
-                                <article class="rounded-2xl border border-stone-200 bg-white p-4">
-                                    <div class="flex items-start justify-between gap-3">
-                                        <div>
-                                            <p class="text-sm font-semibold text-stone-900">{{ $review->author_name }}</p>
-                                            <p class="mt-1 text-xs text-stone-500">
-                                                {{ $review->created_at ? $review->created_at->format('d/m/Y H:i') : 'No timestamp' }}
-                                            </p>
-                                        </div>
-                                        <span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                                            {{ $review->rating }}/5
-                                        </span>
-                                    </div>
-                                    <p class="mt-3 text-sm leading-6 text-stone-700">{{ $review->comment }}</p>
-                                </article>
-                            @empty
-                                <div class="rounded-2xl border border-dashed border-stone-300 bg-white px-4 py-6 text-sm text-stone-500">
-                                    {{ __('No reviews for this product yet.') }}
+                        @if (($reviewMode ?? null) !== 'create')
+                            <div class="flex items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Reviews</p>
+                                    <h3 class="mt-1 text-base font-semibold text-stone-900">
+                                        {{ $reviews->count() }} review{{ $reviews->count() === 1 ? '' : 's' }}
+                                    </h3>
                                 </div>
-                            @endforelse
-                        </div>
+                            </div>
+                            <div id="reviews" class="mt-4 space-y-3">
+                                @forelse ($reviews as $review)
+                                    <article class="rounded-2xl border border-stone-200 bg-white p-4">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div>
+                                                <p class="text-sm font-semibold text-stone-900">{{ $review->author_name }}</p>
+                                                <p class="mt-1 text-xs text-stone-500">
+                                                    {{ $review->created_at ? $review->created_at->format('d/m/Y H:i') : 'No timestamp' }}
+                                                </p>
+                                            </div>
+                                            <span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                                                {{ $review->rating }}/5
+                                            </span>
+                                        </div>
+                                        <p class="mt-3 text-sm leading-6 text-stone-700">{{ $review->comment }}</p>
+                                    </article>
+                                @empty
+                                    <div class="rounded-2xl border border-dashed border-stone-300 bg-white px-4 py-6 text-sm text-stone-500">
+                                        {{ __('No reviews for this product yet.') }}
+                                    </div>
+                                @endforelse
+                            </div>
+                            <div class="mt-4">
+                                <a
+                                    href="{{ route('product.index', ['show' => $selectedProduct->id, 'review' => 'create']) }}#review-form"
+                                    class="inline-flex items-center justify-center rounded-xl bg-amber-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-amber-500"
+                                >
+                                    Create Review
+                                </a>
+                            </div>
+                        @endif
 
-                        <div class="mt-4">
-                            <a
-                                href="{{ route('product.index', ['show' => $selectedProduct->id, 'review' => 'create']) }}#review-form"
-                                class="inline-flex items-center justify-center rounded-xl bg-amber-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-amber-500"
-                            >
-                                Create Review
-                            </a>
-                        </div>
 
                         @if (($reviewMode ?? null) === 'create')
                             @php
@@ -126,14 +128,7 @@
                                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                     <div>
                                         <p class="text-xs font-semibold uppercase tracking-[0.2em] text-amber-700">Add Review</p>
-                                        <h4 class="mt-1 text-base font-semibold text-stone-900">New review for this product</h4>
                                     </div>
-                                    <a
-                                        href="{{ route('product.index', ['show' => $selectedProduct->id]) }}#reviews"
-                                        class="inline-flex items-center justify-center rounded-xl bg-stone-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-stone-700"
-                                    >
-                                        Close
-                                    </a>
                                 </div>
 
                                 @if ($reviewErrors->any())
@@ -146,7 +141,7 @@
                                     </div>
                                 @endif
 
-                                <form method="POST" action="{{ route('review.store', ['product' => $selectedProduct->id]) }}" class="mt-4 space-y-4">
+                                <form method="POST" action="{{ route('review.create', ['product' => $selectedProduct->id]) }}" class="mt-4 space-y-4">
                                     @csrf
 
                                     <div>
@@ -299,7 +294,8 @@
                         </div>
                     </form>
                 @endif
-            </section>
+                </section>
+            @endif
 
             <section class="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-stone-200">
                 <div class="mb-5 flex items-center justify-between">
@@ -334,7 +330,7 @@
                                         <div class="flex flex-nowrap justify-end gap-2">
                                             <a
                                                 href="{{ route('product.show', $product->id) }}"
-                                                class="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-medium text-sky-700 transition hover:bg-sky-100"
+                                                class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-medium text-blue-700 transition hover:bg-blue-100"
                                             >
                                                 Detail
                                             </a>

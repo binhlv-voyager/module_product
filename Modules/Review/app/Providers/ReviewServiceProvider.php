@@ -4,6 +4,8 @@ namespace Modules\Review\Providers;
 
 use Nwidart\Modules\Support\ModuleServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Modules\Product\Contracts\Review\ContractsReview;
+use Modules\Review\Adapters\Product\ProductReviewAdapter;
 use Modules\Review\Repositories\ReviewRepository;
 use Modules\Review\Repositories\ReviewRepositoryInterface;
 use Modules\Review\Services\ReviewService;
@@ -44,6 +46,7 @@ class ReviewServiceProvider extends ModuleServiceProvider
 
         $this->app->bind(ReviewRepositoryInterface::class, ReviewRepository::class);
         $this->app->bind(ReviewServiceInterface::class, ReviewService::class);
+        $this->app->bind(ContractsReview::class, ProductReviewAdapter::class);
     }
 
     /**

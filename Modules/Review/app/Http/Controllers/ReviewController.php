@@ -24,30 +24,32 @@ class ReviewController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Create a newly created review.
      */
-    public function create(Product $product)
-    {
-        // Keep review creation inside the product detail page (products?show=ID&review=create).
-        return redirect()->to(route('product.index', [
-            'show' => (int) $product->id,
-            'review' => 'create',
-        ]) . '#review-form');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreReviewRequest $request, Product $product)
+    public function create(StoreReviewRequest $request, Product $product)
     {
         $this->reviews->createReview([
             ...$request->validated(),
             'product_id' => (int) $product->id,
         ]);
 
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'message' => 'Review created successfully.',
+            ], 201);
+        }
+
         return redirect()->to(route('product.index', [
             'show' => (int) $product->id,
         ]) . '#reviews')->with('status', 'Review created successfully.');
+    }
+
+    /**
+     * Store route is intentionally unsupported.
+     */
+    public function store()
+    {
+        abort(404);
     }
 
     /**
